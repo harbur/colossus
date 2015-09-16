@@ -1,0 +1,16 @@
+[Unit]
+Description=HAProxy Consul
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill haproxy-consul
+ExecStartPre=-/usr/bin/docker rm haproxy-consul
+ExecStartPre=/usr/bin/sudo /usr/bin/ip addr add {{VIRTUAL_IP}}/24 dev ens32
+ExecStart=/usr/bin/docker run --net=host --name=haproxy-consul -e HAPROXY_DOMAIN={{DOMAINNAME}} asteris/haproxy-consul
+ExecStop=/usr/bin/docker stop haproxy-consul
+ExecStop=/usr/bin/sudo /usr/bin/ip addr del {{VIRTUAL_IP}}/24 dev ens32
+TimeoutStartSec=0
+Restart=always
+RestartSec=10s
