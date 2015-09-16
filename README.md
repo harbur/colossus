@@ -97,13 +97,62 @@ core@coreos1 ~ $ docker rm -v redis_server
 redis_server
 ```
 
+**NOTE**: As seen on the example, the DNS discovery resolves the service hostnames using the Private IP of the host machine. This means that the port needs to be fixed and exposed to the host machine. That is why we run the redis server with `-p 6379:6379`.
+
 ## Run an Nginx Service
+
+Now we'll see an another approach for service discovery, using the HAProxy backed by Consul. This is used for external discovery and scales better since it doesn't have the requirement to fix the port to specific host port.
 
 ```shell
 $ docker run -d -p 80 -e SERVICE_NAME=example nginx
 ```
 
+**NOTE**: [SERVICE_NAME](http://gliderlabs.com/registrator/latest/user/services/#service-name) variable can configure the name of the given service.
+
 Open http://example.cluster.local to see the nginx server.
+
+The process is the same as before, but now we use an additional layer: The HAProxy backed by Consul. On port 80 the HAProxy service is running. It uses Consul-template to monitor Consul and update HAProxy on-the-fly.
+
+To check the HAProxy configuration after running nginx do:
+
+```shell
+docker exec haproxy-consul cat /haproxy/haproxy.cfg
+...
+    acl host_example hdr(host) -i example.cluster.local
+    use_backend example_backend if host_example
+...
+backend example_backend
+
+   server coreos1 10.0.0.100:32769
+...
+```
+
+As shown the haproxy is now configured to resolve `example.cluster.local` to `example_backend` which points to the `PRIVATE_IP:EXPOSED_PORT` of that specific container.
+
+If we run two instances of the same nginx server on the 2nd node:
+
+```shell
+docker run -d -p 80 -e SERVICE_NAME=example nginx
+docker run -d -p 80 -e SERVICE_NAME=example nginx
+```
+
+We'll see that the traffic goes to all three instances:
+
+```shell
+docker exec haproxy-consul cat /haproxy/haproxy.cfg
+...
+    acl host_example hdr(host) -i example.cluster.local
+    use_backend example_backend if host_example
+...
+backend example_backend
+
+   server coreos1 10.0.0.100:32769
+   server coreos2 10.0.0.101:32776
+   server coreos2 10.0.0.101:32775
+...
+```
+
+Stop the first server and refresh the web page to see that requests are now redirected to the 2nd node automatically.
 
 License
 -------
