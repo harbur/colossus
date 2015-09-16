@@ -74,11 +74,12 @@ Getting Started
 To Get Started follow these Steps:
 
 * [Create a Coreos Cluster](https://coreos.com/os/docs/latest/booting-on-ec2.html)
-* Configure Wildcard DNS
-* Configure Elastic IP
-* Launch Consul in CoreOS Cluster
-* Launch Registrator in CoreOS Cluster
-* Launch HAProxy in CoreOS Cluster
+* [Install Harbur CLI](http://docs.harbur.io/en/latest/installation/harbur-cli/index.html)
+* [Configure Virtual IP](https://github.com/harbur/colossus/tree/master/docs/VIP)
+* [Configure Wildcard DNS](https://github.com/harbur/colossus/tree/master/docs/DNS)
+* [Launch Consul in CoreOS Cluster](https://cloud.harbur.io/unitfiles/harbur/consul)
+* [Launch Registrator in CoreOS Cluster](https://cloud.harbur.io/unitfiles/harbur/registrator-consul)
+* [Launch HAProxy in CoreOS Cluster](https://cloud.harbur.io/unitfiles/harbur/haproxy-consul)
 
 License
 -------
