@@ -1,0 +1,18 @@
+[Unit]
+Description=Registrator
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill registrator-consul
+ExecStartPre=-/usr/bin/docker rm registrator-consul
+ExecStartPre=/usr/bin/docker pull gliderlabs/registrator
+ExecStart=/usr/bin/docker run --volume /var/run/docker.sock:/tmp/docker.sock --hostname %H --name registrator-consul gliderlabs/registrator -ip=${COREOS_PRIVATE_IPV4} consul://172.17.42.1:8500
+ExecStop=/usr/bin/docker stop registrator-consul
+TimeoutStartSec=0
+Restart=always
+RestartSec=10s
+
+[X-Fleet]
+Global=true

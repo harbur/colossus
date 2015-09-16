@@ -39,4 +39,4 @@ Restart=always
 RestartSec=10s
 
 [X-Fleet]
-Conflicts=consul@*.service
+Global=true
