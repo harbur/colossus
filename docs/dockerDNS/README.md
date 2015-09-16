@@ -11,4 +11,4 @@ To configure this in CoreOS run the following command **on each node**:
 coreos-cloudinit --from-url=https://raw.githubusercontent.com/harbur/colossus/master/docs/dockerDNS/consul-dns-search.config
 ```
 
-*IMPORTANT*: This will restart your docker container server, stopping all running containers.
+**IMPORTANT**: This will restart your docker container server, stopping all running containers.
