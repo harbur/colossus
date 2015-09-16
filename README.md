@@ -36,8 +36,7 @@ docker run -d -p 80 -e SERVICE_NAME=example nginx
 
 Open http://example.cluster.local to see the nginx server.
 
-.. image:: /_static/images/deployment_environment.png
-    :class: img-responsive img-thumbnail
+![image](./imgs/architecture.png)
 
 CoreOS
 ------
