@@ -20,20 +20,10 @@ The Colossus is comprised of the following components:
 
 For more details about each component check [architecture](https://github.com/harbur/colossus/tree/master/docs/architecture)
 
-**Usage Example**
+Installation
+------------
 
-Run an nginx server:
-
-```
-docker run -d -p 80 -e SERVICE_NAME=example nginx
-```
-
-Open http://example.cluster.local to see the nginx server.
-
-Getting Started
----------------
-
-To Get Started follow these Steps:
+To Install Colossus follow these Steps:
 
 * [Create a Coreos Cluster](https://coreos.com/os/docs/latest/booting-on-ec2.html)
 * [Install Harbur CLI](http://docs.harbur.io/en/latest/installation/harbur-cli/index.html)
@@ -42,6 +32,54 @@ To Get Started follow these Steps:
 * [Launch Consul in CoreOS Cluster](https://cloud.harbur.io/unitfiles/harbur/consul)
 * [Launch Registrator in CoreOS Cluster](https://cloud.harbur.io/unitfiles/harbur/registrator-consul)
 * [Launch HAProxy in CoreOS Cluster](https://cloud.harbur.io/unitfiles/harbur/haproxy-consul)
+* [Configure Docker DNS Search](https://github.com/harbur/colossus/tree/master/docs/dockerDNS)
+
+## Using Colossus
+
+## Run Redis Server
+
+Connect to a node with SSH and run:
+
+```shell
+$ docker run -d -p 6379:6379 redis
+```
+
+This will start a redis server in the node. Registrator will pick-up the container creation event and register it to Consul Backend. You can verify that at the Consul UI (http://cluster.local:8500/)
+
+Since Consul is your DNS server on the cluster, all services are now discoverable by DNS. To verify that go to another node and run:
+
+```shell
+$ ping redis.service.consul
+PING redis.service.consul (10.0.0.100) 56(84) bytes of data.
+64 bytes from coreos1.node.dc1.consul (10.4.0.100): icmp_seq=1 ttl=64 time=0.294 ms
+```
+
+For more information about the Consul DNS discovery review [Consul DNS Interface](https://www.consul.io/docs/agent/dns.html)
+
+This also works inside a container as expected:
+
+```shell
+$ docker run --rm -t redis ping redis.service.consul
+PING redis.service.consul (10.4.0.232): 48 data bytes
+56 bytes from 10.4.0.232: icmp_seq=0 ttl=64 time=0.151 ms
+```
+
+Since we configured the [Docker DNS Search](https://github.com/harbur/colossus/tree/master/docs/dockerDNS) The service is also discoverable using just the service name:
+
+```shell
+$ docker run --rm -t redis ping redis
+PING redis.service.consul (10.0.0.100): 48 data bytes
+56 bytes from 10.0.0.100: icmp_seq=0 ttl=64 time=0.187 ms
+```
+
+
+## Run an Nginx Service
+
+```shell
+$ docker run -d -p 80 -e SERVICE_NAME=example nginx
+```
+
+Open http://example.cluster.local to see the nginx server.
 
 License
 -------
