@@ -68,6 +68,18 @@ HAProxy
 
 We use [HAProxy](http://www.haproxy.org/) as reverse proxy and load balancing between instances of a service. The port 80 is listened by the HAProxy that monitors Consul service for existing services and re-configures itself to route traffic to the services using subdomains. For example for service `stable` the URL http://stable.coreos1.acme.local can be used if `acme.local` is the domain of the cluster and `coreos1` is the name of a cluster node.
 
+Getting Started
+---------------
+
+To Get Started follow these Steps:
+
+* [Create a Coreos Cluster](https://coreos.com/os/docs/latest/booting-on-ec2.html)
+* Configure Wildcard DNS
+* Configure Elastic IP
+* Launch Consul in CoreOS Cluster
+* Launch Registrator in CoreOS Cluster
+* Launch HAProxy in CoreOS Cluster
+
 License
 -------
 
