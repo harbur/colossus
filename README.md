@@ -41,15 +41,15 @@ To Install Colossus follow these Steps:
 Connect to a node with SSH and run:
 
 ```shell
-$ docker run --name redis_server -d -p 6379:6379 redis
+core@coreos1 ~ $ docker run --name redis_server -d -p 6379:6379 redis
 ```
 
 This will start a redis server in the node. Registrator will pick-up the container creation event and register it to Consul Backend. You can verify that at the Consul UI (http://cluster.local:8500/)
 
-Since Consul is your DNS server on the cluster, all services are now discoverable by DNS. To verify that go to another node and run:
+Since Consul is your DNS server on the cluster, all services are now discoverable by DNS. To verify that go to **another node** and run:
 
 ```shell
-$ ping redis.service.consul
+core@coreos2 ~ $ ping redis.service.consul
 PING redis.service.consul (10.0.0.100) 56(84) bytes of data.
 64 bytes from coreos1.node.dc1.consul (10.0.0.100): icmp_seq=1 ttl=64 time=0.294 ms
 ```
@@ -59,7 +59,7 @@ For more information about the Consul DNS discovery review [Consul DNS Interface
 This also works inside a container as expected:
 
 ```shell
-$ docker run --rm -it redis ping redis.service.consul
+core@coreos2 ~ $ docker run --rm -it redis ping redis.service.consul
 PING redis.service.consul (10.0.0.100): 48 data bytes
 56 bytes from 10.0.0.10: icmp_seq=0 ttl=64 time=0.151 ms
 ```
@@ -67,9 +67,34 @@ PING redis.service.consul (10.0.0.100): 48 data bytes
 Since we configured the [Docker DNS Search](https://github.com/harbur/colossus/tree/master/docs/dockerDNS) The service is also discoverable using just the service name:
 
 ```shell
-$ docker run --rm -it redis ping redis
+core@coreos2 ~ $ docker run --rm -it redis ping redis
 PING redis.service.consul (10.0.0.100): 48 data bytes
 56 bytes from 10.0.0.100: icmp_seq=0 ttl=64 time=0.187 ms
+```
+
+Let's connect a redis client and write a message from the 2nd node:
+
+```shell
+core@coreos2 ~ $ docker run --rm -it redis redis-cli -h redis
+redis:6379> set hello world
+OK
+```
+
+And let's connect a redis client and read a message from the 3rd node:
+
+```shell
+core@coreos3 ~ $ docker run --rm -it redis redis-cli -h redis
+redis:6379> get hello
+"world"
+```
+
+To cleanup the demo, run the following on the 1st node:
+
+```
+core@coreos1 ~ $ docker kill redis_server
+redis_server
+core@coreos1 ~ $ docker rm -v redis_server
+redis_server
 ```
 
 ## Run an Nginx Service
