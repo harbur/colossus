@@ -12,3 +12,14 @@ coreos-cloudinit --from-url=https://raw.githubusercontent.com/harbur/colossus/ma
 ```
 
 **IMPORTANT**: This will restart your docker container server, stopping all running containers.
+
+## Verify Docker DNS Search
+
+To verify if docker daemon runs with dns-search mode do:
+
+```
+$ ps aux|grep 'docker --daemon'
+root       726  0.1  1.1 1375064 94968 ?       Ssl  Sep09  10:19 docker --daemon --host=fd:// --dns-search=service.consul
+```
+
+The docker daemon should now run with a `--dns-search=service.consul` parameter
