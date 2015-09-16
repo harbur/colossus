@@ -1,0 +1,2 @@
+# colossus
+Colossus = CoreOS + Consul
