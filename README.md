@@ -154,6 +154,10 @@ backend example_backend
 
 Stop the first server and refresh the web page to see that requests are now redirected to the 2nd node automatically.
 
+For more advanced topics check the folowing sections:
+
+* [Container Failure Resilience](https://github.com/harbur/colossus/tree/master/docs/containerFailureResilience)
+
 License
 -------
 
