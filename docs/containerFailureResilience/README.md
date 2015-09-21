@@ -23,8 +23,6 @@ nginx
 $ docker ps -l     
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS               NAMES
 0866d8cd462d        nginx               "nginx -g 'daemon off"   11 seconds ago      Exited (0) 1 seconds ago                       nginx
-$ docker rm -v nginx
-nginx
 ```
 
 We can see that the STATUS is `Exited (0)` Which means the process stopped succesfuly. If non-zero response is given it is considered failure.
@@ -45,6 +43,97 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 
 The STATUS is now non-zero: `Exited (137)` which represents a failure.
 
+To cleanup created containers do the following:
+
+```
+$ docker rm -v nginx
+nginx
+```
+
 ## Docker Auto-restart
 
 In order to achieve container failure resilience, we can define the containers to auto-start on failure.
+
+Docker has [Restart policies](https://docs.docker.com/reference/run/#restart-policies-restart) that can help in authomating restarting in case of container failure.
+
+Let's simulate a failure with restart policy:
+
+```
+$ docker run --restart=always -d --name nginx nginx
+```
+
+Stopping or killling the container using the docker CLI will not trigger the restart policy, instead we need to kill the process inside it:
+
+```
+$ docker top nginx
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                2836                726                 0                   07:59               ?                   00:00:00            nginx: master process nginx -g daemon off;
+104                 2871                2836                0                   07:59               ?                   00:00:00            nginx: worker process
+$ sudo kill 2836
+$ docker ps -l
+CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS                  PORTS               NAMES
+2c68b08c77d9        nginx               "nginx -g 'daemon of   11 minutes ago      Up Less than a second   80/tcp, 443/tcp     nginx
+```
+
+We can now see that the container is restarted automatically (On the STATUS column).
+
+Restart policy helps to create failure resilience and self-heal the process. In this specific scenario the same container is reused and started again.
+
+In case of container corruption (some alteration on the Filesystem that renders the container useless) restart policy will not resolve the problem.
+
+In order to shield us from failures of container corruption, and always following immutable services principles, our restart policy should regenerate a container using the image directly.
+
+This can be performed with [Fleet](	https://coreos.com/using-coreos/clustering/)
+
+
+`nginx-demo@.service`
+
+```
+[Unit]
+Description=Nginx Demo
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill nginx-demo
+ExecStartPre=-/usr/bin/docker rm nginx-demo
+ExecStart=/usr/bin/docker run --name=nginx-demo nginx
+ExecStop=/usr/bin/docker stop nginx-demo
+TimeoutStartSec=0
+Restart=always
+RestartSec=10s
+```
+
+Let's deploy it:
+
+```
+$ fleetctl submit nginx-demo@.service
+$ fleetctl list-unit-files
+UNIT				HASH	DSTATE		STATE		TARGET
+nginx-demo@.service		cbdebdc	inactive	inactive	-
+```
+
+And start it:
+
+```
+$ fleetctl start nginx-demo@1
+$ fleetctl list-units
+UNIT				MACHINE			ACTIVE	SUB
+nginx-demo@1.service		09375bc3.../10.0.0.101	active	running
+```
+
+Now we can try to kill it:
+
+```
+$ docker kill nginx-demo
+$ sleep 10
+$ docker ps
+CONTAINER ID IMAGE COMMAND     CREATED       STATUS       PORTS           NAMES
+3f4f757facf1 nginx "nginx -g ' 2 seconds ago Up 1 seconds 80/tcp, 443/tcp nginx-demo
+````
+
+In this case, container was regenerated (see CREATED column) and started automatically after 10 seconds (`RestartSec` option).
+
+But in case of a total machine failure this is not enough, we need to get [Machine Failure Resilience](https://github.com/harbur/colossus/tree/master/docs/machineFailureResilience) also to achieve better stability.
+
