@@ -54,7 +54,7 @@ nginx
 
 In order to achieve container failure resilience, we can define the containers to auto-start on failure.
 
-Docker has [Restart policies](https://docs.docker.com/reference/run/#restart-policies-restart) that can help in authomating restarting in case of container failure.
+Docker has [Restart policies](https://docs.docker.com/reference/run/#restart-policies-restart) that can help in automating restarting in case of container failure.
 
 Let's simulate a failure with restart policy:
 
