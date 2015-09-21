@@ -157,7 +157,9 @@ Stop the first server and refresh the web page to see that requests are now redi
 For more advanced topics check the folowing sections:
 
 * [Container Failure Resilience](https://github.com/harbur/colossus/tree/master/docs/containerFailureResilience)
+* [High Availability](https://github.com/harbur/colossus/tree/master/docs/highavailability)
 * [Machine Failure Resilience](https://github.com/harbur/colossus/tree/master/docs/machineFailureResilience)
+* [Updating Images](https://github.com/harbur/colossus/tree/master/docs/machineFailureResilience)
 
 License
 -------

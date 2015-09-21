@@ -96,10 +96,10 @@ Requires=docker.service
 
 [Service]
 EnvironmentFile=/etc/environment
-ExecStartPre=-/usr/bin/docker kill nginx-demo
-ExecStartPre=-/usr/bin/docker rm nginx-demo
-ExecStart=/usr/bin/docker run --name=nginx-demo nginx
-ExecStop=/usr/bin/docker stop nginx-demo
+ExecStartPre=-/usr/bin/docker kill nginx-demo-%i
+ExecStartPre=-/usr/bin/docker rm nginx-demo-%i
+ExecStart=/usr/bin/docker run --name=nginx-demo-%i -e SERVICE_80_NAME=nginx-demo -P nginx
+ExecStop=/usr/bin/docker stop nginx-demo-%i
 TimeoutStartSec=0
 Restart=always
 RestartSec=10s
@@ -129,11 +129,12 @@ Now we can try to kill it:
 $ docker kill nginx-demo
 $ sleep 10
 $ docker ps
-CONTAINER ID IMAGE COMMAND     CREATED       STATUS       PORTS           NAMES
-3f4f757facf1 nginx "nginx -g ' 2 seconds ago Up 1 seconds 80/tcp, 443/tcp nginx-demo
+CONTAINER ID IMAGE COMMAND     CREATED       STATUS       PORTS                                         NAMES
+3f4f757facf1 nginx "nginx -g ' 2 seconds ago Up 1 seconds 0.0.0.0:32836->80/tcp, 0.0.0.0:32835->443/tcp nginx-demo
 ````
 
 In this case, container was regenerated (see CREATED column) and started automatically after 10 seconds (`RestartSec` option).
 
-But in case of a total machine failure this is not enough, we need to get [Machine Failure Resilience](https://github.com/harbur/colossus/tree/master/docs/machineFailureResilience) also to achieve better stability.
+The service can be seen at http://nginx-demo.cluster.local/
 
+But in case of a total machine failure this is not enough, we need to get [Machine Failure Resilience](https://github.com/harbur/colossus/tree/master/docs/machineFailureResilience) also to achieve better stability.
